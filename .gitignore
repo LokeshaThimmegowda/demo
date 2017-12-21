@@ -28,3 +28,4 @@ nbdist/
 .gradle
 build
 out
+logs
