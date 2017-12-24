@@ -1,27 +1,25 @@
-pipeline {
-    agent any
+node {
 
-    tools {
-        gradle 'GRADLE4.4'
-    }
+  def gradleContainer
 
-    stages {
-        stage ("Checkout") {
-            steps {
-               git 'https://github.com/LokeshaThimmegowda/demo.git'
-            }
-        }
+  stage('Clone repository') {
+    checkout scm
+  }
 
-        stage('Build') {
-            steps {
-                sh './gradlew clean build'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                sh './gradlew test'
-            }
-        }
-    }
+  stage('Get docker image') {
+    gradleContainer = docker.image('gradle:jdk8-alpine')
+    gradleContainer.pull()
+  }
+  
+  stage('Test application') {
+     gradleContainer.inside("-v ${env.HOME}/.gradle:/home/gradle/.gradle") {
+       sh './gradlew test'
+     }
+  }
+  
+  stage('Push image') {
+     gradleContainer.inside("-v ${env.HOME}/.gradle:/home/gradle/.gradle") {
+       sh './gradlew bootRun'
+     }
+  }
 }
