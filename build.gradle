@@ -3,20 +3,38 @@ buildscript {
 		springBootVersion = '1.5.9.RELEASE'
 	}
 	repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
 		mavenCentral()
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath('gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.13.0')
 	}
 }
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'com.palantir.docker'
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
+
+group = 'lokesha'
+
+jar {
+    baseName = 'demo'
+    version =  '0.1.0'
+}
+
+docker {
+	name "${project.group}/${jar.baseName}"
+	files jar.archivePath
+	buildArgs(['JAR_FILE': "${jar.archiveName}"])
+}
 
 repositories {
 	mavenCentral()
